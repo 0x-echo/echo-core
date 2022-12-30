@@ -1,0 +1,30 @@
+{
+  "name": "@0xecho/core",
+  "version": "0.0.1",
+  "dependencies": {
+    "@ethersproject/bytes": "^5.7.0",
+    "@ethersproject/random": "^5.7.0",
+    "axios": "^1.2.0",
+    "emiter-js": "^1.0.5",
+    "secp256k1": "^4.0.3",
+    "sha256-uint8array": "^0.10.3",
+    "uuid": "^9.0.0"
+  },
+  "scripts": {
+    "build": "rollup -c rollup.config.mjs",
+    "build:watch": "rollup -c rollup.config.mjs --watch"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.20.2",
+    "@rollup/plugin-commonjs": "^23.0.3",
+    "@rollup/plugin-json": "^5.0.2",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "rollup": "^3.5.1",
+    "rollup-plugin-analyzer": "^4.0.0",
+    "rollup-plugin-replace": "^2.2.0",
+    "rollup-terser": "^1.0.3"
+  },
+  "type": "module",
+  "module": "dist/index.esm.js",
+  "main": "dist/index.esm.js"
+}

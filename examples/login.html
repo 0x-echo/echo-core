@@ -1,0 +1,75 @@
+<html>
+  <head>
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+      }
+      
+      /* .echo-button__box {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        max-width: 1024px;
+        padding: 40px 20px;
+        margin: 0 auto;
+      }
+      
+      .echo-button__box-item {
+        position: relative;
+        width: 50%;
+        padding: 240px 0 60px;
+        border: 1px solid #E6E8ED;
+        text-align: center;
+      }
+      
+      .echo-button__box-item.is-dark {
+        background: #16171C;
+      }
+      
+      @media screen and (max-width: 600px) {
+        .echo-button__box-item {
+          width: 100%;
+        }
+      } */
+    </style>
+  </head>
+  <body>
+    <div
+      class="echo-button__box">
+      <div
+        class="echo-button__box-item">
+        <div id="button" style="display:inline-block;">Login</div>
+      </div>
+    </div>
+    <script src="../dist/login.min.js"></script>
+    <script>
+      const login = new EchoLogin({
+        node: 'https://node1.0xecho.com',
+        showLog: true
+      })
+      const $button = document.querySelector('#button')
+      $button.addEventListener('click', async () => {
+        await login.login()
+      })
+
+      // login.on('hello', function (text) {
+      //   console.log('receive', text)
+      // })
+      // new EchoButton({
+      //   targetUri: 'https://0xecho.com',
+      //   maxDisplayLikers: 5,
+      //   alwaysShowPopover: false,
+      // }).mount('#button')
+      
+      // new EchoButton({
+      //   targetUri: 'https://0xecho.com',
+      //   maxDisplayLikers: 5,
+      //   alwaysShowPopover: false,
+      //   partnerName: 'Partner',
+      //   theme: 'dark'
+      // }).mount('#button-dark')
+    </script>
+  </body>
+</html>
