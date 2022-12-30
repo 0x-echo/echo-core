@@ -11,10 +11,11 @@ https://cdn.jsdelivr.net/npm/@0xecho/core/dist/index.min.js
 ``` js
 const echo = new EchoCore({
   node: 'https://sandbox.0xecho.com', // will use production node: https://node1.0xecho.com if not specified
-  // loginAddress: '0x', you can force spcified address for ECHO authorization
+  // loginAddress: '0x', you can force specified address for ECHO authorization
 })
 
 // send a voting post
+// will return 403 if user voted more than once
 try {
   const voteRs = await echo.post({
     type: 'vote',
