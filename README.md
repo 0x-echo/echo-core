@@ -15,11 +15,19 @@ yarn add @0xecho/core
 
 ## Usage
 
+
 ``` js
 const echo = new EchoCore({
   node: 'https://sandbox.0xecho.com', // will use production node: https://node1.0xecho.com if not specified
   // loginAddress: '0x', you can force user to choose specified ethereum address for ECHO authorization
 })
+
+const isAuthorized = echo.isAuthorized() // check if user has login
+const authorizedInfo = echo.getAuthorizedInfo()
+console.log(isAuthorized, authorizedInfo)
+
+// force user to authorize if needed
+// await echo.authorize() 
 
 // send a voting post
 // will return 403 if user votes more than once for the same target_uri

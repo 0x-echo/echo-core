@@ -32,6 +32,18 @@ export default class {
     }
   }
 
+  isAuthorized() {
+    return this.login.hasLogined
+  }
+
+  getAuthorizedInfo() {
+    return this.login.getUserInfo()
+  }
+
+  async authorize() {
+    return await this.login.login()
+  }
+
   showMessage(type, text) {
     return showMessage(this.$message, type, text)
   }
