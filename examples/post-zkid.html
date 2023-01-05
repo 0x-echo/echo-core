@@ -1,0 +1,73 @@
+<html>
+  <head>
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@0xecho/core/dist/index.min.js"></script> -->
+    <script src="../dist/index.min.js"></script>
+    <script>
+      console.log(EchoCore)
+      const echo = new EchoCore({
+        // node: 'https://sandbox.0xecho.com',
+        node: 'http://localhost:9000',
+        wallet: 'zkid'
+        // loginAddress: '0xA6f7F830ed9488c5fcb03E43d449B89b2E38C781'
+      })
+      console.log(echo)
+
+      // zkid wallet may be slow to detect
+      setTimeout(() => {
+        ;(async () => {
+          try {
+            const rs = await echo.post({
+              type: 'vote',
+              sub_type: 'single-choice',
+              target_uri: 'test',
+              content: '0',
+              meta: {
+                title: 'vote',
+                body: 'body',
+                choices: [
+                  'hello',
+                  'world'
+                ]
+              }
+            })
+            console.log('rs', rs)
+          } catch (e) {
+            console.log(e)
+          }
+
+          // try {
+          //   const rs = await echo.post({
+          //     type: 'comment',
+          //     target_uri: 'test',
+          //     content: 'hello'
+          //   })
+          //   console.log('comment rs', rs)
+          // } catch (e) {
+          //   console.log(e)
+          // }
+
+          try {
+            return
+            const rs = await echo.getPosts({
+              type: 'vote',
+              target_uri: 'test',
+              created_by: 'EVM/0x3c98b726cd9e9f20becafd05a9affecd61617c0b'
+            })
+            console.log('vote list', rs)
+          } catch (e) {
+            console.log(e)
+          }
+        })()
+      }, 3000)
+    </script>
+  </body>
+</html>

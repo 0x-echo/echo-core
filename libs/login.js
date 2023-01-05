@@ -1,9 +1,10 @@
 import axios from 'axios'
 
-export async function requestLogin({ account, message, signature, chain, signKeys, node, localstoragePrefix }) {
+export async function requestLogin({ account, message, signature, chain, signKeys, node, wallet, localstoragePrefix }) {
   try {
     const { data: rs } = await axios.post(`${node}/api/v1/users`, {
       chain,
+      wallet,
       address: account,
       message,
       signature,

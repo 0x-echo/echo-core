@@ -7,9 +7,16 @@ import { hashString, insertStyle, appendMessageEl, showMessage } from './libs/co
 import { v4 as uuidv4 } from 'uuid'
 
 export default class {
-  constructor({ node, showLog = false, loginAddress } = {}) {
+  constructor({ node, showLog = false, loginAddress, wallet } = {}) {
     this.node = node || DEFAULT_NODE
-    this.login = new Login({ node: this.node, showLog, loginAddress })
+
+    this.wallet = wallet || 'metamask'
+
+    // remove EVM/ prefix if exists
+    if (loginAddress) {
+      loginAddress = loginAddress.replace(/^EVM\//i, '')
+    }
+    this.login = new Login({ node: this.node, showLog, loginAddress, wallet })
 
     this.localstoragePrefix = `echo_${hashString(this.node)}_`
 

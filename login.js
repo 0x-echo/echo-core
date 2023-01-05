@@ -5,7 +5,8 @@ import { eventEmitter, eventListener } from 'emiter-js'
 import { requestLogin } from './libs/login'
 
 export default class {
-  constructor({ node, showLog = false, loginAddress } = {}) {
+  constructor({ node, showLog = false, loginAddress, wallet } = {}) {
+    this.wallet = wallet || 'metamask'
     this.node = node
     this.userInfo = null
     this.showLog = showLog
@@ -19,9 +20,6 @@ export default class {
 
     this.loginAddress = loginAddress
 
-    // setTimeout(() => {
-    //   eventEmitter.emit('hello', 'world')
-    // }, 3000)
     this.loadUserInfo()
     this.appendMessageEl()
 
@@ -34,8 +32,6 @@ export default class {
     }
   }
 
-  loadUserInfo() {}
-
   getUserInfo() {
     return this.userInfo
   }
@@ -45,7 +41,13 @@ export default class {
   }
 
   async login() {
-    await this.metamask()
+    if (this.wallet === 'metamask') {
+      await this.loginByMetamask()
+    } else if (this.wallet === 'zkid') {
+      await this.loginByZkid()
+    } else {
+      this.showMessage('error', 'No wallet is specified')
+    }
     return this
   }
 
@@ -56,6 +58,13 @@ export default class {
       if (token && userInfo) {
         this.token = token
         this.userInfo = JSON.parse(userInfo)
+
+        // should match the loginAddress
+        if (this.loginAddress && this.loginAddress.toLowerCase() !== this.userInfo.address.toLowerCase()) {
+          this.log('address not matched', this.userInfo)
+          return
+        }
+
         this.setLogined()
         this.log('load user info done', this.userInfo)
       } else {
@@ -99,17 +108,60 @@ export default class {
     }, duration)
   }
 
-  async metamask() {
-    const getAuthMessage = (chain, address) => {
-      const signKeys = generateKeyPair(this.localstoragePrefix)
-      return {
-        message: AUTH_MESSAGE.replace('ADDRESS', `${chain}/${address}`)
-          .replace('TIMESTAMP', new Date().getTime())
-          .replace('PUBLIC_KEY', signKeys.publicKey.replace(/^0x/, '')),
-        signKeys
-      }
+  async loginByZkid() {
+    console.log('login by zkid')
+    if (!window.zkid) {
+      this.showMessage('error', 'Please install zkID Wallet first')
+      return
     }
 
+    const authed = await zkid.request('wallet_isAuth', undefined)
+    if (authed) {
+      // {
+      //   "didUri": "did:zk:0x2C4FbF2A5Fe84f02349a67b5353D9a815647634D",
+      //   "authentication": "0x.....",
+      //   "encryption": ["0x.....", "0x....."],
+      //   "attestation": "0x.....",
+      //   "delegation": "0x....."
+      // }
+      const meta = await zkid.request('did_getCurrent', undefined)
+      const evmAddress = meta.didUri.replace('did:zk:', '')
+      if (this.loginAddress && this.loginAddress.toLowerCase() !== evmAddress.toLowerCase()) {
+        this.showMessage('error', `Please choose wallet: ${this.loginAddress} for ECHO authorization`, 5000)
+        throw new Error(`PLEASE CHOOSE wallet: ${this.loginAddress} FOR ECHO AUTHORIZATION`)
+      } else {
+        const { message, signKeys } = this.getAuthMessage('EVM', evmAddress)
+        const signature = await zkid.request('did_sign', {
+          payload: message
+        })
+
+        const res = await requestLogin({
+          account: evmAddress,
+          message,
+          signature: JSON.stringify(signature),
+          chain: 'EVM',
+          wallet: 'zkid',
+          signKeys,
+          node: this.node,
+          localstoragePrefix: this.localstoragePrefix,
+        })
+
+        this.doneLogin(res)
+      }
+    }
+  }
+
+  getAuthMessage (chain, address) {
+    const signKeys = generateKeyPair(this.localstoragePrefix)
+    return {
+      message: AUTH_MESSAGE.replace('ADDRESS', `${chain}/${address}`)
+        .replace('TIMESTAMP', new Date().getTime())
+        .replace('PUBLIC_KEY', signKeys.publicKey.replace(/^0x/, '')),
+      signKeys
+    }
+  }
+
+  async loginByMetamask() {
     if (window.ethereum) {
       let accounts = []
 
@@ -140,7 +192,7 @@ export default class {
         throw new Error(`PLEASE CHOOSE wallet: ${this.loginAddress} FOR ECHO AUTHORIZATION`)
       }
 
-      const { message, signKeys } = getAuthMessage('EVM', accounts[0])
+      const { message, signKeys } = this.getAuthMessage('EVM', accounts[0])
       const signature = await window.ethereum.request({
         method: 'personal_sign',
         params: [ message, account ]
@@ -155,21 +207,25 @@ export default class {
         localstoragePrefix: this.localstoragePrefix
       })
 
-      if (res.data && res.data.address) {
-        this.token = res.data.token
-        this.userInfo = res.data
-        delete this.userInfo.token
-
-        eventEmitter.emit('post-login', this.userInfo)
-
-        localStorage.setItem(this.TOKEN_KEY, this.token)
-        localStorage.setItem(this.USER_INFO_KEY, JSON.stringify(this.userInfo))
-        this.setLogined()
-
-        return true
-      }
+      this.doneLogin(res)
     } else {
       this.showMessage('error', 'Please install MetaMask first')
+    }
+  }
+
+  doneLogin (res) {
+    if (res.data && res.data.address) {
+      this.token = res.data.token
+      this.userInfo = res.data
+      delete this.userInfo.token
+
+      eventEmitter.emit('post-login', this.userInfo)
+
+      localStorage.setItem(this.TOKEN_KEY, this.token)
+      localStorage.setItem(this.USER_INFO_KEY, JSON.stringify(this.userInfo))
+      this.setLogined()
+
+      return true
     }
   }
 
