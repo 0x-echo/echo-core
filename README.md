@@ -3,7 +3,14 @@
 ## Install
 
 ```
+// cdn(recommended)
 https://cdn.jsdelivr.net/npm/@0xecho/core/dist/index.min.js
+
+// npm
+npm install @0xecho/core
+
+// yarn
+yarn add @0xecho/core
 ```
 
 ## Usage
